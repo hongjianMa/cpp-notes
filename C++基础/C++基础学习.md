@@ -594,6 +594,583 @@ int main()
 }
 ```
 
+## 转换构造函数（隐式类型转换 ）
+
+### 使用转换构造函数的方法
+
+使用转换构造函数将一个指定的数据转换为类对象的方法如下： 
+
+（1） 先声明一个类。
+
+（2） 在这个类中定义一个只有一个参数的构造函数，参数的类型是需要转换的类型，在函数体中指定转换的方法。
+
+（3） 在该类的作用域内可以用以下形式进行类型转换：    类名(指定类型的数据)就可以将指定类型的数据转换为此类的对象。
+
+例：转换构造函数1
+
+```c++
+#include<iostream>
+#include<cstring>
+using namespace std ;
+class Student  
+{	public :
+	   int num ;
+	   string name ;
+	   char sex1; 
+	   Student (int number,string nam,char sex )
+	   {
+	   	     num=number;
+	   	     name=nam ;
+			 sex1=sex;
+	   }
+};
+
+ class Teacher
+ {
+	public :
+	   void display( )
+	   {
+	   	  cout<<"the number is:"<<num1<<endl ;
+		  cout<<"the name is :"<<name1<<endl ;
+	   	  cout<<"the sex is:"<<sex2<<endl ;
+	   	  cout<<"the phone is :"<<phone<<endl ;
+	   	  cout<<"the addr is:"<<addr<<endl ;
+	   }
+	    
+	   
+	   Teacher(Student s,long phon,string add)
+	   {  num1=s.num ;//转换构造函数
+	      name1=s.name ;
+		  sex2=s.sex1 ;
+		  phone=phon;
+	   	   addr=add;
+	   }
+
+	private :
+	   long phone ;
+	   string addr ;
+	   int num1 ;
+	   string name1 ;
+	   char  sex2 ;
+ }; 
+int main(){
+	Student st(201401,"xusong", 'm' );
+	Teacher Te(st,120,"wuhan") ;
+	Te.display() ;
+	return 0 ;	
+}
+```
+
+例2：
+
+```c++
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Test
+{
+private:
+    
+    int mValue;
+
+public:
+    Test()
+    {
+        mValue = 0;
+    }
+    //转换构造函数
+    Test(int i)//类名(指定类型的数据)就可以将指定类型的数据转换为此类的对象。
+    {
+        mValue = i;
+    }
+
+    Test operator+(const Test &p)
+    {
+        Test ret(mValue + p.mValue);
+
+        return ret;
+    }
+
+    int value()
+    {
+        return mValue;
+    }
+};
+
+int main()
+{
+    Test t;
+
+    t = 5; // t = Test(5);
+
+    Test r;
+
+    r = t + 10; // r = t + Test(10);  可能是手误写错，编译却通过
+
+    cout << r.value() << endl;
+
+    return 0;
+}
+```
+
+工程中通过**explicit**关键字杜绝编译器的转换尝试 
+
+转换构造函数被**explicit修饰时只能进行显示转换**
+
+
+
+例如
+
+```c++ 
+explicit Test(int i)  
+{  
+    mValue = i;  
+}  
+```
+
+ 此时直接编译，报错，编译器不会进行转换尝试
+
+![image-20240530072427712](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300724870.png)
+
+
+
+－三种显式转换方式
+
+```c++
+static_cast<ClassName>(value); 
+ 
+ClassName(value); // 不推荐 
+(ClassName)value; // 不推荐 
+```
+
+
+
+main.cpp
+
+```c++
+int main()  
+{     
+    Test t;  
+  
+    //显式类型转换
+    t = static_cast<Test>(5);    // t = Test(5);  
+    //t = (Test)5;   // t = Test(5);  
+ 
+    Test r;  
+      
+    r = t + static_cast<Test>(10);   // r = t + Test(10);  
+    //r = t + (Test)10;   // r = t + Test(10);  
+      
+    cout << r.value() << endl;  
+      
+    return 0;  
+}  
+```
+
+![image-20240530072842040](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300728132.png)
+
+
+
+## 例3:转换构造函数
+
+```c++
+#include <iostream>
+using namespace std;
+
+// 定义一个表示复数的类
+class Complex
+{
+public:
+    // 默认构造函数，初始化复数为0+0i
+    Complex()
+    {
+        real = 0;
+        imag = 0;
+    }
+
+    // 转换构造函数，允许从一个double直接创建复数，虚部默认为0
+    Complex(double r)
+    {
+        real = r;
+        imag = 0;
+    }
+
+    // 带参数的构造函数，初始化复数的实部和虚部
+    Complex(double r, double i)
+    {
+        real = r;
+        imag = i;
+    }
+
+    // 声明友元函数来重载加法运算符，以便直接操作私有成员
+    friend Complex operator+(Complex c1, Complex c2);
+
+    // 成员函数，用于显示复数的实部和虚部
+    void display();
+
+private:
+    double real;  // 复数的实部
+    double imag;  // 复数的虚部
+};
+
+// 重载加法运算符，用于计算两个复数的和
+Complex operator+(Complex c1, Complex c2)
+{
+    return Complex(c1.real + c2.real, c1.imag + c2.imag);
+}
+
+// 实现display方法，格式化输出复数
+void Complex::  display()
+{
+    cout << "(" << real << "+" << imag << "i)" << endl;
+}
+
+int main()
+{
+    // 创建两个复数对象和一个默认复数对象
+    Complex c1(3, 4), c2(5, -10), c3;
+
+    // 将复数c1与一个double值2.5相加，这里会调用Complex(double)将2.5转换为复数
+    c3 = c1 + 2.5;
+
+    // 显示相加后的复数
+    c3.display();
+    return 0;
+}
+
+```
+
+#### (1) 如果程序中没有Complex(double r ){real=r;imag=0;} ，程序编译时会如何？
+
+程序编译会报错。由于已重载了“+”，在处理表达式c1+2.5时，编译系统把它解释为operator+(c1,2.5)，
+
+由于2.5不是Complex类对象，系统先调用转换构造函数Complex(2.5)，建立一个临时的Complex类对象，其值为(2.5+0i)。
+
+上面的函数调用相当于operator+(c1,Complex(2.5))将c1与(2.5+0i) 相加，赋给c3。运行结果为(5.5+4i)
+
+### (2) 如果把“c3=c1+2.5;”改为c3=2.5+c1; 程序可以通过编译吗？ 
+
+###  可以。
+
+### (3) 如果将运算符函数重载为成员函数，complex operator+(double  d);        这个+重载函数可以被 c3=c1+2.5;调用当遇到第一个操作数不是类对象时，怎么办？
+
+再重载一个运算符“+”函数，其第一个参数为double型。
+
+当然此函数只能是友元函数，函数原型为 friend complex   operator+(double  d, Complex c);
+
+显然这样做不太方便，还是将双目运算符函数重载为友元函数方便些。
+
+### （4）
+
+![202405292056713](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300709724.png)
+
+(4) 如果增加类型转换函数： ;程序在编译时出错，为什么？
+
+```c++
+#include<iostream>
+using namespace std;
+class complex
+{
+public:
+ complex(   ){real=0;imag=0;}
+ complex(double a){real=a;imag=0;}//这里出现问题
+ complex(double a,double b){real=a;imag=b;}
+ operator double(){return real;}//这里出现问题
+  friend complex operator + (complex c1,complex c2);
+ void display();
+ private:
+ double real;
+ double imag;
+};
+void complex::display(  )
+{
+ cout<<"("<<real<<"+"<<imag<<"i"<<")"<<"\n";
+}
+complex operator + (complex c1,complex c2)
+{
+ return complex(c1.real+c2.real,c1.imag+c2.imag);
+}
+int main()
+{
+ complex c1(2,3),c3;
+   c3=c1+2.5;                //出现二义性
+ c3.display();
+ return 0;
+}
+```
+
+解决方案：
+
+一、删除语句  operator double( ){return real;}
+
+二、删除语句 friend complex operator + (complex c1,complex c2);
+
+### （6）
+
+![image-20240529215221266](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292152587.png)
+
+![image-20240529215235382](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292152567.png)
+
+![image-20240529215247745](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292152943.png)
+
+## (重点）类型转换函数（类类型转换到普通类型）
+
+类型转换函数的作用是**将一个类的对象转换成另一类型的数据。**
+
+类型转换函数的一般形式为     **operator 类型名( ){实现转换的语句}**
+
+```C++
+operator Type ()  
+{  
+    Type ret;  
+      
+    //...  
+      
+    return ret;  
+}  
+```
+
+
+
+在函数名前面不能指定函数类型。其返回值的类型是由函数名中指定的类型名来确定的。
+
+类型转换函数只能作为成员函数，因为转换的主体是本类的对象。不能作为友元函数或普通函数.
+
+**转换构造函数和类型转换运算符有一个共同的功能：当需要的时候，编译系统会自动调用这些函数，建立一个无名的临时对象(或临时变量)。**
+
+
+
+**类型转换函数** 
+
+​      －与**转换构造函数**具有**同等的地位** 
+
+​      －使得编译器有能力将对象转化为其它类型 
+
+​      －编译器能够**隐式**的使用类型转换函数 
+
+
+
+代码说明
+
+```C++
+
+#include <iostream>  
+#include <string>  
+  
+using namespace std;  
+  
+class Test  
+{  
+    int mValue;  
+public:  
+    Test(int i = 0)  
+    {  
+        mValue = i;  
+    }  
+    int value()  
+    {  
+        return mValue;  
+    }  
+    operator int ()  
+    {  
+        return mValue;  
+    }  
+};  
+  
+int main()  
+{     
+    Test t(100);  
+    int i = t;  //t.operator int()
+      
+    cout << "t.value() = " << t.value() << endl;  
+    cout << "i = " << i << endl;  
+      
+    return 0;  
+} 
+```
+
+![image-20240530073437862](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300734011.png)
+
+
+
+编译器会尽力尝试让源码通过编译 ，如下
+
+```c++
+Test t(100);  
+int i = t;  //t.operator int()
+```
+
+t这个对象为Test类型，怎么可能用于初始化int类型的变量呢！现在就报错吗？
+
+不急，看看有没有类型转换函数! Ok, 发现Test类中定义了operator int () , 可以进行转换
+
+
+
+类类型之间的转换
+
+```c++
+#include <iostream>  
+ 
+using namespace std;  
+  
+class Test;  
+  
+class Value  
+{  
+public:  
+    Value()  
+    {  
+    }  
+    explicit Value(Test& t) //若不加explicit，则会报错，两个转换函数都会隐式调用不知调用哪个，所以指明该转换构造函数必须显示调用
+    {  
+    }  
+};  
+  
+class Test  
+{  
+    int mValue;  
+public:  
+    Test(int i = 0)  
+    {  
+        mValue = i;  
+    }  
+    int value()  
+    {  
+        return mValue;  
+    }  
+    operator Value()  
+    {  
+        Value ret;  
+        cout << "operator Value()" << endl;  
+        return ret;  
+    }  
+};  
+  
+int main()  
+{     
+    Test t(100);  
+    Value v = t;  
+      
+    return 0;  
+}  
+```
+
+![image-20240530073937271](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300739370.png)
+
+
+
+无法抑制隐式的类型转换函数调用 
+
+类型转换函数可能与转换构造函数冲突 
+
+工程中以Type toType()的公有成员代替类型转换函数 
+
+```cpp
+#include <iostream>  
+  
+using namespace std;  
+  
+class Test;  
+  
+class Value  
+{  
+public:  
+    Value()  
+    {  
+    }  
+    Value(Test& t)  
+    {  
+    }  
+};  
+  
+class Test  
+{  
+    int mValue;  
+public:  
+    Test(int i = 0)  
+    {  
+        mValue = i;  
+    }  
+    int value()  
+    {  
+        return mValue;  
+    }  
+    Value toValue()  //工程中以Type toType()的公有成员代替类型转换函数
+    {  
+        Value ret;  
+        cout<<"toValue!"<<endl;
+        return ret;  
+    }  
+};  
+  
+int main()  
+{     
+    Test t(100);  
+    Value v = t.toValue();  
+      
+    return 0;  
+} 
+```
+
+
+
+
+
+例：类型转换函数
+
+```c++
+#include <iostream>
+using namespace std;
+
+// 定义一个表示复数的类
+class Complex
+{
+public:
+    // 默认构造函数，初始化复数为0+0i
+    Complex()
+    {
+        real = 0;
+        imag = 0;
+    }
+
+    // 带参数的构造函数，初始化复数的实部和虚部
+    Complex(double r, double i)
+    {
+        real = r;
+        imag = i;
+    }
+
+    // 类型转换运算符重载，允许将Complex对象转换为double类型，返回实部
+    operator double() { return real; }
+
+private:
+    double real;  // 复数的实部
+    double imag;  // 复数的虚部
+};
+
+int main()
+{
+    // 创建两个Complex对象c1和c2，并初始化它们的值
+    Complex c1(3, 4), c2(5, -10), c3;
+
+    // 定义一个double类型的变量d
+    double d;
+
+    // 将c1转换为double类型（即获取其实部），并与2.5相加后赋值给d
+    d = 2.5 + c1;
+
+    // 输出计算结果
+    cout << d << endl;
+
+    return 0;
+}
+
+```
+
+
+
 # 常见基础知识点
 
 ## 常对象
@@ -606,7 +1183,7 @@ const   类名 对象名[(实参表列)];
 
 ### 如果一个对象被声明为常对象，则不能调用该对象的非const型的成员函数。
 
-![image-20240517191438201](https://cdn.jsdelivr.net/gh/Github/hongjianMa/picture/master/202405171915199.png)
+![202405171915199](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292154428.png)
 
 编译系统只检查函数的声明，只要发现调用了常对象的成员函数，而且该成员函数<u>未被声明为const，</u>就报错。
 
@@ -688,9 +1265,7 @@ t1.hour = 18;   // 正确
 
 #### 指向常对象的指针只能调用常成员函数
 
-![image-20240517200941630](https://cdn.jsdelivr.net/gh/Github/hongjianMa/picture/master/202405172009952.png)
-
-
+![202405172009952](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292154018.png)
 
 ### 指针常量
 
@@ -708,7 +1283,7 @@ p = &b;      //error 不可以指向别的变量
 
 ## 对象的常引用
 
-![image-20240517202203805](https://cdn.jsdelivr.net/gh/Github/hongjianMa/picture/master/202405172022101.png)
+![202405172022101](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155462.png)
 
 强制修改const限定的值
 
@@ -793,7 +1368,7 @@ int main()
 
 # 继承
 
-![image-20240503110157564](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131337461.png)
+![image-20240503110157564](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155550.png)
 
 ## 继承中构造和析构的顺序
 
@@ -842,7 +1417,7 @@ int main()
 }
 ```
 
-![](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338863.png)
+![](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155628.png)
 
 ## 同名成员的调用
 
@@ -893,7 +1468,7 @@ int main()
 }
 ```
 
-![image-20240503182301224](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338906.png)
+![image-20240503182301224](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155023.png)
 
 ## 虚基类：菱形继承
 
@@ -928,11 +1503,23 @@ int main()
 }
 ```
 
-![image-20240503191559133](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338132.png)
+![image-20240503191559133](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156760.png)
 
 //唯一性，解决二义性
 
 # C++运算符重载
+
+## 不能重载的运算符
+
+1.类属关系运算符“.“
+
+2.成员指针运算符".*"
+
+3.作用域运算符”::“
+
+4.测试运算符”sizeof“
+
+5.三目运算符"?:"
 
 ## 重载运算符的函数一般格式如下：
 
@@ -943,6 +1530,38 @@ int main()
 ## 重载运算符的规则
 
 ![image-20240517204911869](https://cdn.jsdelivr.net/gh/Github/hongjianMa/picture/master/202405172049158.png)
+
+(1)C++不允许用户自己定义新的运算符，只能对已有的C++运算符进行重载。
+
+(2) C++允许重载的运算符C++中绝大部分的运算符允许重载。不能重载的运算符只有5个
+
+1.类属关系运算符“.“
+
+2.成员指针运算符".*"
+
+3.作用域运算符”::“
+
+4.测试运算符”sizeof“
+
+5.三目运算符"?:"
+
+前两个运算符不能重载是为了保证访问成员的功能不能被改变，域运算符和sizeof运算符的运算对象是类型而不是变量或一般表达式，不具有重载的特征。
+
+(3) 重载不能改变运算符运算对象(即操作数)的个数。
+
+(4) 重载不能改变运算符的优先级别。
+
+(5) 重载不能改变运算符的结合性。
+
+(6) 重载运算符的函数<u>不能有默认的参数</u>，否则就改变了运算符参数的个数，与前面第(3)点矛盾。
+
+(7) 重载的运算符必须和用户定义的自定义类型的对象一起使用，其参数至少应有一个是类对象(或类对象的引用)。也就是说，参数不能全部是C++的标准类型，以防止用户修改用于标准类型数据的运算符的性质。
+
+(8) 用于类对象的运算符一般必须重载，但有两个例外，运算符“=”和“&”不必用户重载。① 赋值运算符(=)可以用于每一个类对象，可以利用它在同类对象之间相互赋值。② 地址运算符&也不必重载，它能返回类对象在内存中的起始地址。
+
+(9) 应当使重载运算符的功能类似于该运算符作用于标准类型数据时所实现的功能。
+
+(10) 运算符重载函数可以是类的成员函数，也可以是类的友元函数，还可以是既非类的成员函数也不是友元函数的普通函数。
 
 ## 加号+运算重载
 
@@ -1036,7 +1655,19 @@ int main()
 }
 ```
 
-## 左移运算符<<重载
+## 左移运算符<<重载和>>运算符重载
+
+对“<<”和“>>”重载的函数形式如下：
+
+ istream & operator >> (istream &,自定义类 &);
+
+ostream & operator << (ostream &,自定义类 &);
+
+即重载运算符“>>”的函数的第一个参数和函数的类型都必须是istream &类型，第二个参数是要进行输入操作的类。
+
+重载“<<”的函数的第一个参数和函数的类型都必须是ostream&类型，第二个参数是要进行输出操作的类。
+
+只能将重载“>>”和“<<”的函数作为友元函数或普通的函数，而不能将它们定义为成员函数。
 
 ```c++
 #include <iostream>
@@ -1074,7 +1705,7 @@ int main()
 }
 ```
 
-## >>和<<运算符重载
+### >>和<<运算符重载
 
 ### 例题
 
@@ -1165,7 +1796,7 @@ using namespace std;
 
 class A
 {
-    friend ostream &operator <<(ostream& cout,A p);//这里不引用
+    friend ostream &operator <<(ostream& cout,const A &p);//这里一点更要加const
 public:
     A(int a):m_a(a){};
 
@@ -1191,7 +1822,7 @@ private:
 
 };
 
-ostream &operator <<(ostream& cout,A p)
+ostream &operator <<(ostream& cout,const A &p)
 {
     cout<<p.m_a;
     return cout;
@@ -1216,7 +1847,23 @@ int main()
 }
 ```
 
-![image-20240507105423210](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338981.png)
+![image-20240507105423210](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156141.png)
+
+#### 为什么重载前置++要返回引用，后置++不返回引用
+
+在 C++ 中，重载前置和后置自增运算符时，使用不同的方法来实现这两个运算符有其特定的理由。这涉及到返回值的类型和方法，以及期望的行为。
+
+1. **前置自增（`++operator`）**:
+   - **返回引用（`A&`）**：前置自增运算符的目的是增加对象的值，并返回增加后的对象。返回引用是合理的选择，因为我们希望直接修改原始对象，而不是其副本。这也使得前置自增可以用在更复杂的表达式中，如 `++a = b`，并确保操作是在原对象上进行，提高了效率（避免了不必要的对象复制）。
+2. **后置自增（`operator++(int)`）**:
+   - **返回值（不是引用）**：后置自增的行为与前置自增不同。后置自增应该首先保存对象当前的状态，然后增加对象的值，最后返回原始状态的一个副本。因此，它返回的是对象的副本，而不是引用。如果你尝试返回引用，那么返回的将是已经被修改的对象，这不符合后置自增的预期行为（应返回增加之前的状态）。
+
+总结一下，这些差异归根结底是为了确保前置和后置自增符合其预期的语义：
+
+- **前置自增**直接修改原对象并返回修改后的对象，因此返回引用。
+- **后置自增**应返回操作前的状态，因此需要返回一个新的对象副本，以反映自增前的状态。
+
+这样设计可以确保每种运算符的使用都符合直觉和C++中的常规操作语义。
 
 ## 赋值运算符重载
 
@@ -1273,45 +1920,97 @@ int main()
 
 ## 关系运算符重载
 
+重载> < ==关系运算符，学习strcmp的用法，1表示大于，0表示相等，-1表示小于
+
 ```c++
+
 #include <iostream>
-using namespace std;
 #include <cstring>
-class A
+using namespace std;
+class String
 {
 public:
-    A(int a,string name):m_a(a),m_name(name){};
-    int m_a;
-    string m_name;
+    String() { p = NULL; }
+    String(char *str);
+    //双目重载关系运算符用友元函数
+    friend bool operator>(String &string1, String &string2);
+    friend bool operator<(String &string1, String &string2);
+    friend bool operator==(String &string1, String &string2);
+    void display();
 
-    bool operator==(A p)
-    {
-        if(this->m_a==p.m_a&&this->m_name==p.m_name){
-            return true;
-        }
-        return false;
-
-    }
+private:
+    char *p;
 };
 
-void test01()
+String::String(char *str)
 {
-    A p1(18,"马洪建");
-    A p2(18,"马洪建");
-    if(p1==p2){
-        cout<<"相同"<<endl;
-    }
-    else{
-        cout<<"不同"<<endl;
-    }
-
+    p = str;
 }
+
+void String::display()
+{
+    cout << p;
+}
+
+bool operator>(String &string1, String &string2)
+{
+    if (strcmp(string1.p, string2.p) > 0)
+        return true;
+    else
+        return false;
+}
+
+bool operator<(String &string1, String &string2)
+{
+    if (strcmp(string1.p, string2.p) < 0)
+        return true;
+    else
+        return false;
+}
+
+bool operator==(String &string1, String &string2)
+{
+    if (strcmp(string1.p, string2.p) == 0)
+        return true;
+    else
+        return false;
+}
+
+void compare(String &string1, String &string2)
+{
+    if (operator>(string1, string2))
+    {
+        string1.display();
+        cout << ">";
+        string2.display();
+    }
+    else if (operator<(string1, string2))
+    {
+        string1.display();
+        cout << "<";
+        string2.display();
+    }
+    else if (operator==(string1, string2))
+    {
+        string1.display();
+        cout << "=";
+        string2.display();
+    }
+    cout << endl;
+}
+
 int main()
 {
-    test01();
+    String string1("Hello"), string2("Book"), string3("Computer"), string4("Hello");
+    compare(string1, string2);
+    compare(string2, string3);
+    compare(string1, string4);
     return 0;
 }
+
 ```
+
+
 
 # 多态
 
@@ -1501,15 +2200,15 @@ int main()
 
 # 文件操作
 
-![image-20240513092703392](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338790.png)
+![image-20240513092703392](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156238.png)
 
-![image-20240513092735264](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338605.png)
+![image-20240513092735264](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156944.png)
 
-![image-20240513092750319](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131341088.png)
+![image-20240513092750319](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156149.png)
 
 
 
-![image-20240513092803677](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338350.png)
+![image-20240513092803677](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156483.png)
 
 ## 写文件
 
@@ -1543,7 +2242,7 @@ int main()
 
 ## 读文件
 
-![image-20240513092622834](https://raw.githubusercontent.com/hongjianMa/picture/master/202405131338406.png)
+![image-20240513092622834](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292156586.png)
 
 
 
