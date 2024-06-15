@@ -1057,7 +1057,7 @@ int main()
 }  
 ```
 
-![image-20240530073937271](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300739370.png)
+![屏幕截图 2024-05-30 073933](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405300753645.png)
 
 
 
@@ -1370,6 +1370,68 @@ int main()
 
 ![image-20240503110157564](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155550.png)
 
+## 派生类的构造函数
+
+派生类构造函数一般形式为
+
+**派生类构造函数名（总参数表列）:基类构造函数名（参数表列）  {派生类中新增数据成员初始化语句}**
+
+```c++
+Student1(int n,string nam,char s,int a,string ad) : Student(n,nam,s) 
+{    age=a;                        
+     addr=ad;
+}
+```
+
+初始化列表
+
+```c++
+Student1(int n, string nam,char s,int a, string ad):Student(n,nam,s),age(a),addr(ad){   }
+
+```
+
+### 派生类的构造函数的任务
+
+（1） 对基类数据成员初始化；
+
+（2） 对子对象数据成员初始化；
+
+（3） 对派生类数据成员初始化。
+
+### 执行派生类构造函数的顺序  
+
+基类-->子对象-->派生
+
+
+
+① 调用基类构造函数，对基类数据成员初始化；
+
+② 调用子对象构造函数，对子对象数据成员初始化；
+
+③ 再执行派生类构造函数本身，对派生类数据成员初始化。
+
+### 注意点
+
+如果在**基类或子对象类型的声明中定义了带参数的构造函数**，那么就必须显式地定义派生类构造函数，并在派生类构造函数中写出基类或子对象类型的构造函数及其参数表
+
+ 如果在基类中既定义了无参的构造函数，又定义了有参的构造函数(构造函数重载)，则在定义派生类构造函数时，既可以包含基类构造函数及其参数，也可以不包含基类构造函数。在调用派生类构造函数时，根据构造函数的内容决定调用基类的有参的构造函数还是无参的构造函数。编程者可以根据派生类的需要决定采用哪一种方式。
+
+## 派生类的析构函数
+
+1.在派生时，派生类是不能继承基类的析构函数的，需要通过派生类的析构函数去调用基类的析构函数。在派生类中可以根据需要定义自己的析构函数，用来对派生类中所增加的成员进行清理工作。基类的清理工作仍然由基类的析构函数负责。
+
+
+
+2.在执行派生类的析构函数时，系统会自动调用基类的析构函数和子对象的析构函数，对基类和子对象进行清理。
+
+
+
+3.**调用的顺序与构造函数正好相反**:            派生->子对象->基类
+
+先执行派生类自己的析构函数，对派生类新增加的成员进行清理，然后调用子对象的析构函数，对子对象进行清理，最后调用基类的析构函数，对基类进行清理。
+
+
+
 ## 继承中构造和析构的顺序
 
 先构造父类，再构造子类
@@ -1470,7 +1532,21 @@ int main()
 
 ![image-20240503182301224](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202405292155023.png)
 
-## 虚基类：菱形继承
+## 多重继承派生类的构造函数
+
+### 构造函数形式
+
+ 派生类构造函数名(总参数表列): 基类1构造函数(参数表列), 基类2构造函数(参数表列), 基类3构造函数 (参数表列) {派生类中新增数据成员初始化语句}
+
+### 
+
+
+
+
+
+## 虚基类
+
+### 菱形继承
 
 ```c++
 #include <iostream>
@@ -1507,6 +1583,131 @@ int main()
 
 //唯一性，解决二义性
 
+### 虚基类的作用
+
+  如果一个派生类有多个直接基类，而这些直接基类又有一个共同的基类，则在最终的派生类中会保留该间接共同基类数据成员的多份同名成员。在引用这些同名的成员时，必须在派生类对象名后增加直接基类名，以避免产生二义性，使其惟一地标识一个成员，c1. A::display( )。
+
+  C++提供虚基类的方法，使得在继**承间接共同基类时只保留一份成员**。
+
+![image-20240615101645356](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151016723.png)
+
+### 虚基类声明方式
+
+class 派生类名: virtual  继承方式   基类名
+
+```c++
+class A:virtual public N{};
+class B:virtual public N{};
+```
+
+经过这样的声明后，当基类通过多条派生路径被一个派生类继承时，该**派生类只继承该基类一次**。
+
+### 虚基类的初始化
+
+![image-20240615102446503](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151024877.png)
+
+
+
+**C++编译系统只执行最后的派生类对虚基类的构造函数的调用**，而忽略虚基类的其他派生类(如类B和类C) 对虚基类的构造函数的调用，这就保证了虚基类的数据成员不会被多次初始化。
+
+
+
+## 基类与派生类的转换
+
+### 派生类对象可以向基类对象赋值
+
+可以用子类B(即公用派生类)对象对其基类A对象赋值。
+
+A  a1;              
+
+B   b1;                
+
+a1=b1;               
+
+在赋值时舍弃派生类自己的成员。**赋值只是对数据成员赋值**，**对成员函数不存在赋值问题。**  
+
+![image-20240615104448266](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151044585.png)
+
+![image-20240615104613841](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151046217.png)
+
+###  派生类对象可以替代基类对象向基类对象的引用进行赋值或初始化。
+
+![image-20240615105005437](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151050816.png)
+
+![image-20240615105113212](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151051570.png)
+
+![image-20240615105241619](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151052007.png)
+
+### 如果函数的参数是基类对象或基类对象的引用，相应的实参可以用子类对象
+
+![image-20240615105424854](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151054210.png)
+
+### 指向基类对象的指针变量也可以指向派生类对象
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+class Student
+ {public:
+   Student(int,string,float);
+   void display();
+  private:
+   int num;
+   string name;
+   float score;
+ };
+
+Student::Student(int n,string nam,float s)
+ {num=n;
+  name=nam;
+  score=s;
+ }
+
+void Student::display()
+ {cout<<endl<<"num:"<<num<<endl;
+  cout<<"name:"<<name<<endl;
+  cout<<"score:"<<score<<endl;
+ }
+ 
+class Graduate:public Student
+ {public:
+   Graduate(int,string,float,float);
+   void display();
+ private:
+  float pay;
+};
+
+void Graduate::display()
+ {Student::display();
+  cout<<"pay="<<pay<<endl;
+ }
+
+Graduate::Graduate(int n,string nam,float s,float p):Student(n,nam,s),pay(p){}
+
+int main()
+ {Student stud1(1001,"Li",87.5);
+  Graduate grad1(2001,"Wang",98.5,563.5);
+  Student *pt=&stud1;
+  pt->display();
+  pt=&grad1;
+  pt->display();
+  return 0;
+ }
+  
+
+```
+
+![image-20240615105802829](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151058057.png)
+
+![image-20240615105815320](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151058668.png)
+
+
+
+
+
+
+
 # C++运算符重载
 
 ## 不能重载的运算符
@@ -1529,7 +1730,7 @@ int main()
 
 ## 重载运算符的规则
 
-![image-20240517204911869](https://cdn.jsdelivr.net/gh/Github/hongjianMa/picture/master/202405172049158.png)
+![202405172049158](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151019649.png)
 
 (1)C++不允许用户自己定义新的运算符，只能对已有的C++运算符进行重载。
 
@@ -2014,6 +2215,18 @@ int main()
 
 # 多态
 
+## 多态概念
+
+多态性是指具有**不同功能的函数可以用同一个函数名**，这样就可以用一个函数名调用不同内容的函数。
+
+多态性分为两类: **静态多态性**和**动态多态性**。
+
+**静态多态性**：函数重载和运算符重载实现的多态性属于静态多态性。在程序编译时系统就能决定调用的是哪个函数，因此静态多态性又称编译时的多态性，静态多态性是通过**函数的重载**实现的(运算符重载实质上也是函数重载)。
+
+动态多态性：在程序运行过程中才动态地确定操作所针对的对象。它又称运行时的多态性。动态多态性是通过虚函数实现的。
+
+
+
 ## 多态的基本使用
 
 ```c++
@@ -2071,7 +2284,141 @@ int main()
 }
 ```
 
+## 虚函数
+
+![image-20240615135547427](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151355837.png)
+
+### 一个例子
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+class Student
+ {public:
+   Student(int,string,float);
+   void display();            
+  protected:
+   int num;
+   string name;
+   float score;
+ };
+
+Student::Student(int n,string nam,float s)
+ {num=n;name=nam;score=s;}
+
+void Student::display()
+ {cout<<"num:"<<num<<"\nname:"<<name<<"\nscore:"<<score<<"\n\n";}
+ 
+class Graduate:public Student
+ {public:
+   Graduate(int,string,float,float);
+   void display();
+ private:
+  float pay;
+};
+
+void Graduate::display()
+ {cout<<"num:"<<num<<"\nname:"<<name<<"\nscore:"<<score<<"\npay="<<pay<<endl;}
+
+Graduate::Graduate(int n,string nam,float s,float p):Student(n,nam,s),pay(p){}
+
+int main()
+ {Student stud1(1001,"Li",87.5);
+  Graduate grad1(2001,"Wang",98.5,1200);
+  Student *pt=&stud1;
+  pt->display();
+  pt=&grad1;
+  pt->display();
+  return 0;
+ }
+```
+
+![image-20240615140153759](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151401947.png)
+
+//注意这里没有输出grad1的pay，因为没有使用虚函数
+
+
+
+下面是使用了虚函数的程序
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+class Student
+ {public:
+   Student(int,string,float);
+   virtual void display();//这里使用了虚函数
+  protected:
+   int num;
+   string name;
+   float score;
+ };
+
+Student::Student(int n,string nam,float s)
+ {num=n;name=nam;score=s;}
+
+void Student::display()//在外面具体实现虚函数不需要加virtual关键字
+ {cout<<"num:"<<num<<"\nname:"<<name<<"\nscore:"<<score<<"\n\n";}
+ 
+class Graduate:public Student
+ {public:
+   Graduate(int,string,float,float);
+   void display();
+ private:
+  float pay;
+};
+
+void Graduate::display()
+ {cout<<"num:"<<num<<"\nname:"<<name<<"\nscore:"<<score<<"\npay="<<pay<<endl;}
+
+Graduate::Graduate(int n,string nam,float s,float p):Student(n,nam,s),pay(p){}
+
+int main()
+ {Student stud1(1001,"Li",87.5);
+  Graduate grad1(2001,"Wang",98.5,1200);
+  Student *pt=&stud1;
+  pt->display();
+  pt=&grad1;
+  pt->display();
+  return 0;
+ }
+  
+
+```
+
+![image-20240615140344005](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151403210.png)
+
+这里就正常输出了pay了
+
+![image-20240615141407070](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151414436.png)
+
+![image-20240615141543968](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151415307.png)
+
+
+
+
+
+## 要使用虚函数的情况
+
+![image-20240615142148565](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151421933.png)
+
+![image-20240615142313926](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151423276.png)
+
+![image-20240615142354811](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151423178.png)
+
+
+
+
+
+
+
 ## 纯虚函数和抽象类
+
+![image-20240615143328693](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151433074.png)
+
+![image-20240615143405062](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151434447.png)
 
 ```c++
 #include <iostream>
@@ -2197,6 +2544,86 @@ int main()
     return 0;
 }
 ```
+
+
+
+### 虚析构函数
+
+![image-20240615142550184](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151425543.png)
+
+#### 一个虚析构的例子
+
+下面是没有使用虚析构
+
+```c++
+#include <iostream>
+using namespace std;
+class Point
+{public:
+  Point(){}
+  ~Point(){cout<<"executing Point destructor"<<endl;}
+};
+
+class Circle:public Point
+{public:
+  Circle(){}
+  ~Circle(){cout<<"executing Circle destructor"<<endl;}
+ private:
+  int radus;
+};
+
+int main()
+{Point *p=new Circle;
+ delete p;
+ return 0;
+}
+
+```
+
+![image-20240615142841974](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151428201.png)
+
+可以看到当new创建的对象delete时只执行了基类的析构函数
+
+
+
+下面是使用了虚析构的情况
+
+```c++
+#include <iostream>
+using namespace std;
+class Point
+{public:
+  Point(){}
+  virtual ~Point(){cout<<"executing Point destructor"<<endl;}
+};
+
+class Circle:public Point
+{public:
+  Circle(){}
+  ~Circle(){cout<<"executing Circle destructor"<<endl;}
+ private:
+  int radus;
+};
+
+int main()
+{Point *p=new Circle;
+ delete p;
+ return 0;
+}
+
+```
+
+![image-20240615143042758](https://gitee.com/hongjian-ma/tuchuang/raw/master/picture/202406151430980.png)
+
+可以看到派生类的析构函数也调用了
+
+
+
+最好把**基类的析构函数声明为虚函数**。这将使所有派生类的析构函数自动成为虚函数。这样，如果程序中显式地用了delete运算符准备删除一个对象，而delete运算符的操作对象用了指向派生类对象的基类指针，则系统会调用相应类的析构函数。
+
+
+
+
 
 # 文件操作
 
